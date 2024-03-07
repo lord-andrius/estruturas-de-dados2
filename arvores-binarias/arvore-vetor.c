@@ -76,26 +76,17 @@ void bubble_sort(int numeros[], size_t length) {
 	} while(troca);
 }
 
+// Arredonda pra baixo
 int adiciona_elementos(struct arvore *arvore, int numeros[], size_t length) {
 	bubble_sort(numeros, length);
 	if(length == 1) {
 		return adiciona_elemento(arvore, numeros[0]);
-	} else if(length == 2) {
-		if(adiciona_elemento(arvore, numeros[0]) != 0) return 1;
-		return adiciona_elemento(arvore, numeros[1]);
-	} else if(length % 2 != 0) {
+	} else{
 		size_t tamanho_metade = (length - 1) / 2; // tambem é o indice do elemento da metade!
 		if(adiciona_elemento(arvore, numeros[tamanho_metade]) != 0) return 1;
 		if(adiciona_elementos(arvore, numeros, tamanho_metade) != 0) return 1;
 		return adiciona_elementos(arvore, numeros + tamanho_metade + 1, tamanho_metade);
-	} else {
-
-		size_t tamanho_metade = (length - 2) / 2; // tambem é o indice do elemento da metade!
-		if(adiciona_elemento(arvore, numeros[tamanho_metade]) != 0) return 1;
-		if(adiciona_elemento(arvore, numeros[tamanho_metade + 1]) != 0) return 1;
-		if(adiciona_elementos(arvore, numeros, tamanho_metade) != 0) return 1;
-		return adiciona_elementos(arvore, numeros + tamanho_metade + 2, tamanho_metade);
-	}
+	} 
 }
 
 int main(int argc, char *argv[]) {
