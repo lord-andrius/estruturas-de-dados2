@@ -72,7 +72,7 @@ int adiciona_elementos(struct arvore **arvore, int numeros[], size_t length) {
 	if(length == 1) {
 		return adiciona_ou_cria_arvore(arvore, numeros[0]);
 	} else if(length == 2){
-		if(adiciona_ou_cria_arvore(arvore, numeros[0] != 0)) return 1;
+		if(adiciona_ou_cria_arvore(arvore, numeros[0]) != 0) return 1;
 		return adiciona_ou_cria_arvore(arvore, numeros[1] != 0);
 
 	} else if(length % 2 != 0) {
