@@ -89,6 +89,18 @@ int adiciona_elementos(struct arvore **arvore, int numeros[], size_t length) {
 	}
 }
 
+struct arvore *pegar_elemento(struct arvore *arvore, int dado) {
+	if(arvore == NULL) {
+		return NULL;
+	} else if(arvore->dado == dado) {
+		return arvore;
+	} else if(arvore->dado < dado) {
+		return pegar_elemento(arvore->filho_direita, dado);
+	} else {
+		return pegar_elemento(arvore->filho_esquerda, dado);
+	}
+}
+
 void andar_em_ordem_crescente(struct arvore *arvore) {
 	if(arvore != NULL) {
 		andar_em_ordem_crescente(arvore->filho_esquerda);
@@ -121,6 +133,8 @@ int main(void) {
 	assert(arvore3->dado == 2);
 	assert(arvore3->filho_esquerda->dado == 1);
 	assert(arvore3->filho_direita->dado == 3);
+	assert(pegar_elemento(arvore3, 3) != NULL);
+	assert(pegar_elemento(arvore3, 10) == NULL);
 	puts("Passou nos testes!!");
 	return 0;
 }
