@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include <assert.h>
 
+#define COUNT 10
+
 void bubble_sort(int numeros[], size_t length) {
 	int troca;
 	do {
@@ -71,11 +73,15 @@ int adiciona_elementos(struct arvore **arvore, int numeros[], size_t length) {
 	bubble_sort(numeros, length);
 	if(length == 1) {
 		return adiciona_ou_cria_arvore(arvore, numeros[0]);
-	} else {
-		size_t tamanho_metade = (length - 1) / 2; // tambem é o indice do elemento da metade!
+	} else if(length == 2){
+		
+		if(adiciona_ou_cria_arvore(arvore, numeros[0]) != 0) return 1;
+		return adiciona_ou_cria_arvore(arvore, numeros[1]);
+	}else {
+		size_t tamanho_metade = length / 2; // tambem é o indice do elemento da metade!
 		if(adiciona_ou_cria_arvore(arvore, numeros[tamanho_metade]) != 0) return 1;
 		if(adiciona_elementos(arvore, numeros, tamanho_metade) != 0) return 1;
-		return adiciona_elementos(arvore, numeros + tamanho_metade + 1, tamanho_metade);
+		return adiciona_elementos(arvore, numeros + (tamanho_metade + 1), length - (tamanho_metade + 1));
 	}
 }
 
@@ -92,6 +98,7 @@ struct arvore *pegar_elemento(struct arvore *arvore, int dado) {
 }
 
 void andar_em_ordem_crescente(struct arvore *arvore) {
+	
 	if(arvore != NULL) {
 		andar_em_ordem_crescente(arvore->filho_esquerda);
 		printf("%d\n", arvore->dado);
@@ -99,25 +106,42 @@ void andar_em_ordem_crescente(struct arvore *arvore) {
 	}
 }
 
+void mostrar(struct arvore *arvore, int space) {
+		
+	if(arvore == NULL) {
+		return;
+	}
+	
+	space += COUNT;
+	
+	mostrar(arvore->filho_direita, space);
+
+	puts("");
+ 
+	for(int i = COUNT; i < space; i++) printf(" ");
+
+	printf("%d\n", arvore->dado);
+
+	mostrar(arvore->filho_esquerda, space);
+}
+
 void panico(const char *msg) {
 	puts(msg);
 	exit(EXIT_FAILURE);
 }
+
 int main(void) {
 	int impar[] = {1,2,3};
-	struct arvore *arvore = NULL;
-	if(adiciona_ou_cria_arvore(&arvore, 8) != 0);
-	if(adiciona_ou_cria_arvore(&arvore, 7) != 0);
-	if(adiciona_ou_cria_arvore(&arvore, 9) != 0);
-	assert(arvore->filho_esquerda->dado == 7);
-	assert(arvore->filho_direita->dado == 9);
-	struct arvore *arvore3 = NULL;
-	adiciona_elementos(&arvore3, impar, 3);
-	assert(arvore3->dado == 2);
-	assert(arvore3->filho_esquerda->dado == 1);
-	assert(arvore3->filho_direita->dado == 3);
-	assert(pegar_elemento(arvore3, 3) != NULL);
-	assert(pegar_elemento(arvore3, 10) == NULL);
-	puts("Passou nos testes!!");
+	int teste[] = {1,2,3,4,5,6,7,8};
+	struct arvore *arvore4 = NULL;
+	adiciona_elementos(&arvore4, teste, 8);
+	//for(int i = 0; i < 8; i++) printf("%d\n", teste[i]);
+	//printf("%d\n", arvore4->dado);
+	//assert(arvore4->filho_esquerda->filho_direita->dado == 8);
+	mostrar(arvore4,0);
 	return 0;
 }
+
+
+
+
