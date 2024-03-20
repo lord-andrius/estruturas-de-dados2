@@ -125,20 +125,63 @@ void mostrar(struct arvore *arvore, int space) {
 	mostrar(arvore->filho_esquerda, space);
 }
 
-void panico(const char *msg) {
-	puts(msg);
-	exit(EXIT_FAILURE);
+struct arvore *pegar_sucessor(struct arvore *arvore) {
+	struct arvore *sucessor = arvore->filho_direita;
+	while(sucessor->filho_esquerda != NULL) sucessor = sucessor->filho_esquerda;
+	return sucessor;
 }
 
+void deletar_elemento(struct arvore *arvore, int dado) {
+	struct arvore *no = pegar_elemento(arvore, dado);
+	if(no == NULL) return;
+
+	if(no->filho_esquerda == NULL && no->filho_direita == NULL) {
+		if(no->pai->dado > dado) { // Quer dizer que o que eu estou tentando exclúir está na esquerda do pai
+			no->pai->filho_esquerda = NULL;
+			free(no);
+		} else {
+			no->pai->filho_direita = NULL;
+			free(no);
+		}
+	} else if(no->filho_esquerda && no->filho_direita) {
+		struct arvore *sucessor = pegar_sucessor(no);
+		no->dado = sucessor->dado;
+		//sucessor->pai->filho_esquerda = NULL;
+		deletar_elemento(sucessor, sucessor->dado);
+	} else if(no->filho_esquerda) {
+		no->dado = no->filho_esquerda->dado;
+		free(no->filho_esquerda);
+		no->filho_esquerda = NULL;
+	} else if(no->filho_direita) {
+		no->dado = no->filho_direita->dado;
+		free(no->filho_direita);
+		no->filho_direita = NULL;
+	}
+}
 int main(void) {
-	int impar[] = {1,2,3};
 	int teste[] = {1,2,3,4,5,6,7,8};
+	int teste2[] = {1,2};
+	int teste3[] = {1,2,3,4,5};
 	struct arvore *arvore4 = NULL;
+	struct arvore *arvore5 = NULL;
+	struct arvore *arvore6 = NULL;
 	adiciona_elementos(&arvore4, teste, 8);
-	//for(int i = 0; i < 8; i++) printf("%d\n", teste[i]);
-	//printf("%d\n", arvore4->dado);
-	//assert(arvore4->filho_esquerda->filho_direita->dado == 8);
+	adiciona_elementos(&arvore5, teste2, 2);
+	adiciona_elementos(&arvore6, teste3, 5);
 	mostrar(arvore4,0);
+	deletar_elemento(arvore4, 2);
+	puts("1==============================================================================");
+	mostrar(arvore4,0);
+	puts("2==============================================================================");
+	mostrar(arvore5,0);
+	deletar_elemento(arvore5, 1);
+	puts("3==============================================================================");
+	mostrar(arvore5,0);
+	puts("4==============================================================================");
+	mostrar(arvore6,0);
+	deletar_elemento(arvore6, 3);
+	puts("5==============================================================================");
+	mostrar(arvore6,0);
 	return 0;
 }
 
