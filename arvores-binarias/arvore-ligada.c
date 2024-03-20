@@ -150,11 +150,11 @@ void deletar_elemento(struct arvore *arvore, int dado) {
 		deletar_elemento(sucessor, sucessor->dado);
 	} else if(no->filho_esquerda) {
 		no->dado = no->filho_esquerda->dado;
-		free(no->filho_esquerda);
+		deletar_elemento(no->filho_esquerda, no->filho_esquerda->dado);
 		no->filho_esquerda = NULL;
 	} else if(no->filho_direita) {
 		no->dado = no->filho_direita->dado;
-		free(no->filho_direita);
+		deletar_elemento(no->filho_direita, no->filho_direita->dado);
 		no->filho_direita = NULL;
 	}
 }
