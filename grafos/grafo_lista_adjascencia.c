@@ -39,6 +39,54 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 
 
 
+int adiciona_conecao(struct Vertice *a, struct Vertice *b) {
+	int pode_adicionar = 1;
+	for(int i = 0; i < a->qtd_adjascentes; i++) {
+		if(a->adjascentes[i]->dado == b->dado) {
+			pode_adicionar = 0;
+			break;
+		}
+	}
+
+	// Se der algum bug por favor verifique se o a está em b :)
+	
+	if(pode_adicionar) {
+		// melhor lidar com o realloc. No momento se houver uma falha na alocação vamos ter um vazamento de memória(Melhor o seu pc ter RAM!).
+		a->adjascentes = realloc(a->adjascentes,sizeof(struct Vertice **) * (a->qtd_adjascentes + 1));
+		if(!a->adjascentes == null) return 1;
+		b->adjascentes = realloc(b->adjascentes,sizeof(struct Vertice **) * (b->qtd_adjascentes + 1));
+		if(!b->adjascentes == null) return 1;
+		a->adjascentes[a->qtd_adjascentes++] = b;
+		b->adjascentes[b->qtd_adjascentes++] = a;
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
+int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *conexoes, int qtd_conexoes) {
+	if(!grafo) return 1;
+
+	struct Vertice *vertice = procura_vertice(grafo, dado);
+
+	int deve_add = vertice == NULL;
+
+	if(deve_add) {
+		if((vertice = criar_vertice(dado)) == NULL) return 1;
+		// melhor lidar com o realloc. No momento se houver uma falha na alocação vamos ter um vazamento de memória(Melhor o seu pc ter RAM!).
+		grafo->vertices = realloc(grafo->vertices,sizeof(struct Vertice **) * (grafo->numero_vertices + 1));
+		if(!grafo->vertices) return 1;
+		grafo->vertices[grafo->numero_vertices++] = vertice;
+	}
+
+
+	for(int i = 0; i < qtd_conexoes; i++) {
+		if(adiciona_conecao(vertice, conexoes + i)) return 1; // caso dê erro em alguma conexão
+	}
+
+	
+}
+
 
 int main(void) {
 	puts("Olá, mundo!");
