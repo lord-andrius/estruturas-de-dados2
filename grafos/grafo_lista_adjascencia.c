@@ -11,8 +11,8 @@ struct Grafo *cria_grafo(void) {
 struct Vertice *procura_vertice(struct Grafo *grafo,int dado) {
 	struct Vertice *vertice = NULL;	
 	for(int i = 0; i < grafo->numero_vertices; i++) {
-		if(grafo->vertices[i].dado == dado) {
-			vertice = grafo->vertices + i;
+		if(grafo->vertices[i]->dado == dado) {
+			vertice = grafo->vertices[i];
 			break;
 		}
 	}
@@ -24,7 +24,7 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 	struct Vertice *vertice = NULL;
 	int pode_criar = 1;
 	for(int i = 0; i < grafo->numero_vertices; i++) {
-		if(grafo->vertices[i].dado == dado) {
+		if(grafo->vertices[i]->dado == dado) {
 			pode_criar = 0;
 			break;
 		}
@@ -53,9 +53,9 @@ int adiciona_conecao(struct Vertice *a, struct Vertice *b) {
 	if(pode_adicionar) {
 		// melhor lidar com o realloc. No momento se houver uma falha na alocação vamos ter um vazamento de memória(Melhor o seu pc ter RAM!).
 		a->adjascentes = realloc(a->adjascentes,sizeof(struct Vertice **) * (a->qtd_adjascentes + 1));
-		if(!a->adjascentes == null) return 1;
+		if(a->adjascentes == NULL) return 1;
 		b->adjascentes = realloc(b->adjascentes,sizeof(struct Vertice **) * (b->qtd_adjascentes + 1));
-		if(!b->adjascentes == null) return 1;
+		if(b->adjascentes == NULL) return 1;
 		a->adjascentes[a->qtd_adjascentes++] = b;
 		b->adjascentes[b->qtd_adjascentes++] = a;
 		return 0;
@@ -72,7 +72,7 @@ int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *con
 	int deve_add = vertice == NULL;
 
 	if(deve_add) {
-		if((vertice = criar_vertice(dado)) == NULL) return 1;
+		if((vertice = cria_vertice(grafo,dado)) == NULL) return 1;
 		// melhor lidar com o realloc. No momento se houver uma falha na alocação vamos ter um vazamento de memória(Melhor o seu pc ter RAM!).
 		grafo->vertices = realloc(grafo->vertices,sizeof(struct Vertice **) * (grafo->numero_vertices + 1));
 		if(!grafo->vertices) return 1;

@@ -18,5 +18,5 @@ struct Vertice *procura_vertice(struct Grafo *grafo,int dado);
 struct Vertice *cria_vertice(struct Grafo *grafo, int dado);
 int adiciona_conecao(struct Vertice *a, struct Vertice *b);
 	
-int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *conexoes);
+int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *conexoes, int qtd_conexoes);
 #endif
