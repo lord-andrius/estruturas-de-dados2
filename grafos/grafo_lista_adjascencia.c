@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <"grafo_lista_adjascencia.h">
+#include "grafo_lista_adjascencia.h"
 
 
 struct Grafo *cria_grafo(void) {
@@ -9,7 +9,7 @@ struct Grafo *cria_grafo(void) {
 }
 
 struct Vertice *procura_vertice(struct Grafo *grafo,int dado) {
-	struct Vertice vertice = NULL;	
+	struct Vertice *vertice = NULL;	
 	for(int i = 0; i < grafo->numero_vertices; i++) {
 		if(grafo->vertices[i].dado == dado) {
 			vertice = grafo->vertices + i;

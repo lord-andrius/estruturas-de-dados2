@@ -9,7 +9,7 @@ struct Vertice {
 struct Grafo {
 	int numero_vertices;
 	struct Vertice *vertices;
-}
+};
 
 struct Grafo *cria_grafo(void);
 
