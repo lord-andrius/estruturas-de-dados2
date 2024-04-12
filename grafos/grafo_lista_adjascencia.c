@@ -1,11 +1,28 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <assert.h>
 #include "grafo_lista_adjascencia.h"
 
 
 struct Grafo *cria_grafo(void) {
 	struct Grafo *grafo = calloc(1, sizeof(struct Grafo));
 	return grafo;	
+}
+
+void destroi_grafo(struct Grafo **grafo) {
+	if(*grafo == NULL) return;
+
+	for(int i = 0; i < (*grafo)->numero_vertices; i++){
+		if((*grafo)->vertices[i] != NULL) {
+			if((*grafo)->vertices[i]->adjascentes != NULL) {
+				free((*grafo)->vertices[i]->adjascentes);
+			}	
+		}
+	}
+
+	free((*grafo)->vertices);
+	free(*grafo);
+	*grafo = NULL;
 }
 
 struct Vertice *procura_vertice(struct Grafo *grafo,int dado) {
@@ -33,6 +50,7 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 	if(pode_criar == 0) return NULL;
 
 	vertice = calloc(1, sizeof(struct Vertice));
+	vertice->dado = dado;
 
 	return vertice;
 }
@@ -40,6 +58,8 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 
 
 int adiciona_conecao(struct Vertice *a, struct Vertice *b) {
+	assert(a != NULL);
+	assert(b != NULL);
 	int pode_adicionar = 1;
 	for(int i = 0; i < a->qtd_adjascentes; i++) {
 		if(a->adjascentes[i]->dado == b->dado) {
@@ -64,7 +84,7 @@ int adiciona_conecao(struct Vertice *a, struct Vertice *b) {
 	}
 }
 
-int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *conexoes, int qtd_conexoes) {
+int adiciona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice **conexoes, int qtd_conexoes) {
 	if(!grafo) return 1;
 
 	struct Vertice *vertice = procura_vertice(grafo, dado);
@@ -81,14 +101,75 @@ int adicona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice *con
 
 
 	for(int i = 0; i < qtd_conexoes; i++) {
-		if(adiciona_conecao(vertice, conexoes + i)) return 1; // caso dê erro em alguma conexão
+		if(conexoes[i] == NULL) continue;
+		if(adiciona_conecao(vertice, conexoes[i])) return 1; // caso dê erro em alguma conexão
 	}
 
+	return 0;
 	
 }
 
+void printa_grafo(struct Grafo *grafo) {
+	for(int i = 0; i < grafo->numero_vertices; i++) {
+		printf("%d: ", grafo->vertices[i]->dado);
+		for(int i2 = 0; i2 < grafo->vertices[i]->qtd_adjascentes; i2++) {
+			printf("%d ", grafo->vertices[i]->adjascentes[i2]->dado);
+		}
+		puts("");
+	}
+}
 
 int main(void) {
-	puts("Olá, mundo!");
+	struct Grafo *grafo = cria_grafo();
+
+	assert(grafo != NULL);
+	assert(grafo->numero_vertices == 0);
+	assert(grafo->vertices == NULL);
+
+	assert(adiciona_ou_modifica_grafo(grafo, 1, NULL, 0) == 0);
+	assert(grafo->numero_vertices == 1);
+	assert(grafo->vertices != NULL);
+	assert(grafo->vertices[0]->dado == 1);
+
+
+	//Testando se ele está impedindo de adicionar o mesmo número
+	assert(adiciona_ou_modifica_grafo(grafo, 1, NULL, 0) == 0);
+	assert(grafo->numero_vertices == 1);
+	assert(grafo->vertices != NULL);
+	assert(grafo->vertices[0]->dado == 1);
+	assert(grafo->vertices[0]->qtd_adjascentes == 0);
+
+
+	assert(adiciona_ou_modifica_grafo(grafo, 2, (struct Vertice *[]){procura_vertice(grafo, 1)}, 1) == 0);
+	assert(grafo->numero_vertices == 2);
+	assert(grafo->vertices[1]->dado == 2);
+	assert(grafo->vertices[1]->qtd_adjascentes == 1);
+	assert(grafo->vertices[0]->qtd_adjascentes == 1);
+	assert(grafo->vertices[0]->adjascentes[0]->dado == 2);
+
+	assert(adiciona_ou_modifica_grafo(grafo, 3, (struct Vertice *[]){procura_vertice(grafo, 1)}, 1) == 0);
+	assert(grafo->numero_vertices == 3);
+	assert(grafo->vertices[2]->dado == 3);
+	assert(grafo->vertices[2]->qtd_adjascentes == 1);
+	assert(grafo->vertices[0]->qtd_adjascentes == 2);
+	assert(grafo->vertices[0]->adjascentes[1]->dado == 3);
+
+	assert(adiciona_ou_modifica_grafo(
+			grafo, 
+			4, 
+			(struct Vertice *[]){procura_vertice(grafo, 2), procura_vertice(grafo, 3)}, 2) == 0);
+	assert(grafo->numero_vertices == 4);
+	assert(grafo->vertices[3]->dado == 4);
+	assert(grafo->vertices[3]->qtd_adjascentes == 2);
+	assert(grafo->vertices[1]->qtd_adjascentes == 2);
+	assert(grafo->vertices[2]->qtd_adjascentes == 2);
+	assert(grafo->vertices[2]->adjascentes[1]->dado == 4);
+	assert(grafo->vertices[1]->adjascentes[1]->dado == 4);
+	assert(grafo->vertices[3]->adjascentes[0]->dado == 2);
+	assert(grafo->vertices[3]->adjascentes[1]->dado == 3);
+
+	printa_grafo(grafo);
+
+	destroi_grafo(&grafo);
 	exit(0);
 }
