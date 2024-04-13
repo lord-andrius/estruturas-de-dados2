@@ -119,6 +119,42 @@ void printa_grafo(struct Grafo *grafo) {
 	}
 }
 
+// O deletar está incompleto
+int deletar_vertice(struct Grafo *grafo, int dado) {
+	assert(grafo != NULL);
+
+	for(int i = 0; i < grafo->numero_vertices; i++){
+		for(int i2 = 0; i2 < grafo->vertices[i]->qtd_adjascentes; i2++) {
+			if(grafo->vertices[i]->adjascentes[i2]->dado == dado) {
+				struct Vertice *tmp = grafo->vertices[i]->adjascentes[i2];
+				grafo->vertices[i]->adjascentes[i2] = grafo->vertices[i]->adjascentes[grafo->vertices[i]->qtd_adjascentes - 1];
+				grafo->vertices[i]->adjascentes[grafo->vertices[i]->qtd_adjascentes - 1] = tmp;
+				grafo->vertices[i]->adjascentes[i2]->qtd_adjascentes -= 1;
+				struct Vertice **novos_adjascentes = realloc(grafo->vertices[i]->adjascentes, grafo->vertices[i]->qtd_adjascentes * sizeof(struct Vertice **));
+				if(!novos_adjascentes) return 1;
+				grafo->vertices[i]->adjascentes = novos_adjascentes;
+				if(grafo->vertices[i]->qtd_adjascentes == 0) grafo->vertices[i]->adjascentes = NULL;
+			}
+
+		}
+		#if 0
+		if(grafo->vertices[i]->dado == dado) {
+			struct Vertice *tmp = grafo->vertices[i];
+			grafo->vertices[i] = grafo->vertices[grafo->numero_vertices - 1];
+			grafo->vertices[grafo->numero_vertices - 1] = tmp;
+			struct Vertice **novos_vertices = realloc(grafo->vertices, grafo->numero_vertices * sizeof(struct Vertice **));
+			if(!novos_vertices) return 1;
+			grafo->vertices = novos_vertices;
+			if(grafo->numero_vertices == 0) grafo->vertices = NULL;
+		}
+		#endif
+	} 
+
+	return 0;
+
+
+}
+
 int main(void) {
 	struct Grafo *grafo = cria_grafo();
 
@@ -168,6 +204,11 @@ int main(void) {
 	assert(grafo->vertices[3]->adjascentes[0]->dado == 2);
 	assert(grafo->vertices[3]->adjascentes[1]->dado == 3);
 
+	printa_grafo(grafo);
+	
+	assert(!deletar_vertice(grafo, 4));
+	
+	puts("=====================================");
 	printa_grafo(grafo);
 
 	destroi_grafo(&grafo);

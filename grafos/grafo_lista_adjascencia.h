@@ -20,4 +20,9 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado);
 int adiciona_conecao(struct Vertice *a, struct Vertice *b);
 	
 int adiciona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice **conexoes, int qtd_conexoes);
+
+void printa_grafo(struct Grafo *grafo);
+
+int deletar_vertice(struct Grafo *grafo, int dado);
+
 #endif
