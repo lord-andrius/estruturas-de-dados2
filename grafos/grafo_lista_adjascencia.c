@@ -119,7 +119,6 @@ void printa_grafo(struct Grafo *grafo) {
 	}
 }
 
-// O deletar está incompleto
 int deletar_vertice(struct Grafo *grafo, int dado) {
 	assert(grafo != NULL);
 
@@ -140,7 +139,6 @@ int deletar_vertice(struct Grafo *grafo, int dado) {
 			}
 
 		}
-		// apartir daqui as coisas podem dar errado
 		if(grafo->vertices[i]->dado == dado) {
 			struct Vertice *tmp = grafo->vertices[i];
 			grafo->vertices[i] = grafo->vertices[grafo->numero_vertices - 1];
