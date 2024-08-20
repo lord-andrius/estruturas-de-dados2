@@ -1,8 +1,15 @@
 #ifndef GRAFO_LISTA_ADJASCENCIA
 #define GRAFO_LISTA_ADJASCENCIA
 
+enum Cor {
+	BRANCO,
+	CINZA,
+	PRETO
+};
+
 struct Vertice {
 	int dado;
+	enum Cor cor;
 	int qtd_adjascentes;
 	struct Vertice **adjascentes;
 };
@@ -24,5 +31,9 @@ int adiciona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice **c
 void printa_grafo(struct Grafo *grafo);
 
 int deletar_vertice(struct Grafo *grafo, int dado);
+
+void buscar_por_conexoes(struct Vertice *vertice);
+
+void mostrar_conexoes(struct Grafo *grafo);
 
 #endif

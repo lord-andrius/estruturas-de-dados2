@@ -51,9 +51,29 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 
 	vertice = calloc(1, sizeof(struct Vertice));
 	vertice->dado = dado;
+	vertice->cor = BRANCO;
 
 	return vertice;
 }
+
+void buscar_por_conexoes(struct Vertice *vertice) {
+	if(vertice->cor != BRANCO) return;
+
+	vertice->cor = CINZA;
+	for(int i = 0; i < vertice->qtd_adjascentes; i++) {
+		buscar_por_conexoes(vertice->adjascentes[i]);
+	}
+	vertice->cor = PRETO;
+}
+
+void mostrar_conexoes(struct Grafo *grafo) {
+	for(int i = 0; i < grafo->numero_vertices; i++) {
+		if(grafo->vertices[i]->cor == PRETO) {
+			printf("%d, ", grafo->vertices[i]->dado);
+		}
+	}
+}
+
 
 
 
@@ -206,6 +226,10 @@ int main(void) {
 	assert(grafo->vertices[3]->adjascentes[1]->dado == 3);
 
 	printa_grafo(grafo);
+
+	buscar_por_conexoes(grafo->vertices[0]);
+
+	mostrar_conexoes(grafo);
 	
 	assert(!deletar_vertice(grafo, 4));
 	
