@@ -1,3 +1,4 @@
+#include "fila.h"
 #ifndef GRAFO_LISTA_ADJASCENCIA
 #define GRAFO_LISTA_ADJASCENCIA
 
@@ -35,5 +36,9 @@ int deletar_vertice(struct Grafo *grafo, int dado);
 void buscar_por_conexoes(struct Vertice *vertice);
 
 void mostrar_conexoes(struct Grafo *grafo);
+
+void limpar_resultado_da_busca_de_conexoes(struct Grafo *grafo);
+
+void menor_caminho(struct Fila *caminho, struct Vertice *origem, struct Vertice *destino);
 
 #endif

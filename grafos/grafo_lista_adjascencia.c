@@ -2,6 +2,8 @@
 #include <stdlib.h>
 #include <assert.h>
 #include "grafo_lista_adjascencia.h"
+#include "fila.h"
+
 
 
 struct Grafo *cria_grafo(void) {
@@ -65,6 +67,13 @@ void buscar_por_conexoes(struct Vertice *vertice) {
 	}
 	vertice->cor = PRETO;
 }
+
+void limpar_resultado_da_busca_de_conexoes(struct Grafo *grafo) {
+	for(int i = 0; i < grafo->numero_vertices; i++) {
+		grafo->vertices[i]->cor = BRANCO;
+	}
+}
+
 
 void mostrar_conexoes(struct Grafo *grafo) {
 	for(int i = 0; i < grafo->numero_vertices; i++) {
@@ -173,8 +182,78 @@ int deletar_vertice(struct Grafo *grafo, int dado) {
 
 	return 0;
 
-
 }
+
+
+void menor_caminho(struct Fila *caminho, struct Vertice *origem, struct Vertice *destino) {
+	if(origem->cor == CINZA) return;
+	printf("DEBUG: origem: %d\n", origem->dado);
+	adicionar_elemento(caminho, &origem->dado);
+	origem->cor = CINZA;
+
+	if(origem->dado == destino->dado || origem->qtd_adjascentes == 0) {
+		origem->cor = BRANCO;
+		return;
+	}
+
+	struct Fila **possiveis_caminhos = malloc(sizeof(caminho) * origem->qtd_adjascentes);
+	if(possiveis_caminhos == NULL) {
+		printf("Erro de alocação de memória!\n");
+		exit(1);
+	}
+
+	for(int i = 0; i < origem->qtd_adjascentes; i++) {
+		possiveis_caminhos[i] = criar_fila(sizeof(origem->dado));
+		if(possiveis_caminhos == NULL) {
+			printf("Erro de alocação de memória!\n");
+			exit(1);
+		}
+		menor_caminho(possiveis_caminhos[i], origem->adjascentes[i], destino);
+	}
+	struct Fila *menor_caminho = NULL;
+	for(int i = 0; i < origem->qtd_adjascentes; i++) {
+		int chegou_ao_destino = 0;
+
+		struct _Elemento *proximo = NULL;
+		for (struct _Elemento *atual = possiveis_caminhos[i]->primeiro_elemento; atual != NULL; atual = proximo)
+		{
+			proximo = atual->proximo;
+			int dado_do_vertice_atual = *(int *)atual->elemento;
+			if(destino->dado == dado_do_vertice_atual) {
+				chegou_ao_destino = 1;
+				break;
+			}
+		}
+
+		if(chegou_ao_destino) {
+			if(menor_caminho == NULL) {
+				menor_caminho =  possiveis_caminhos[i];
+			} else {
+				if(menor_caminho->quantidade_elementos > possiveis_caminhos[i]->quantidade_elementos) {
+					menor_caminho =  possiveis_caminhos[i];
+				}
+			}
+		}
+	}
+
+	struct _Elemento *proximo = NULL;
+	for (struct _Elemento *atual = menor_caminho->primeiro_elemento; atual != NULL; atual = proximo)
+	{
+		proximo = atual->proximo;
+		int dado_do_vertice_atual = *(int *)atual->elemento;
+		adicionar_elemento(caminho, &dado_do_vertice_atual);
+	}
+
+
+	for(int i = 0; i < origem->qtd_adjascentes; i++) {
+		deletar_fila(possiveis_caminhos + i);
+	}
+	free(possiveis_caminhos); 
+
+	origem->cor = BRANCO;
+	return;
+}
+
 
 int main(void) {
 	struct Grafo *grafo = cria_grafo();
@@ -214,7 +293,8 @@ int main(void) {
 	assert(adiciona_ou_modifica_grafo(
 			grafo, 
 			4, 
-			(struct Vertice *[]){procura_vertice(grafo, 2), procura_vertice(grafo, 3)}, 2) == 0);
+			(struct Vertice *[]){procura_vertice(grafo, 2), procura_vertice(grafo, 3), procura_vertice(grafo, 1)}, 3) == 0);
+	/*
 	assert(grafo->numero_vertices == 4);
 	assert(grafo->vertices[3]->dado == 4);
 	assert(grafo->vertices[3]->qtd_adjascentes == 2);
@@ -224,12 +304,25 @@ int main(void) {
 	assert(grafo->vertices[1]->adjascentes[1]->dado == 4);
 	assert(grafo->vertices[3]->adjascentes[0]->dado == 2);
 	assert(grafo->vertices[3]->adjascentes[1]->dado == 3);
-
+	*/
 	printa_grafo(grafo);
 
 	buscar_por_conexoes(grafo->vertices[0]);
 
-	mostrar_conexoes(grafo);
+	//mostrar_conexoes(grafo);
+
+	struct Fila *fila = criar_fila(sizeof(int));
+	menor_caminho(fila, grafo->vertices[0], grafo->vertices[3]);
+	struct _Elemento *proximo = NULL;
+	for (struct _Elemento *atual = fila->primeiro_elemento; atual != NULL; atual = proximo)
+	{
+		proximo = atual->proximo;
+		int dado_do_vertice_atual = *(int *)atual->elemento;
+		printf("%d ", dado_do_vertice_atual);
+	}
+	puts("");
+
+
 	
 	assert(!deletar_vertice(grafo, 4));
 	

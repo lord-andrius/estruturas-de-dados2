@@ -2,5 +2,5 @@ cmake_minimum_required(VERSION 3.20)
 
 project(grafos)
 
-add_executable(grafo_lista_adjascencia grafo_lista_adjascencia.c)
+add_executable(grafo_lista_adjascencia grafo_lista_adjascencia.c fila.c)
 add_executable(grafo_lista_adjascencia_unidirecional grafo_lista_adjascencia_unidirecional.c)
