@@ -1,8 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <locale.h>
+#include <time.h>
 #include "grafo_lista_adjascencia.h"
 #include "fila.h"
+
 
 
 
@@ -52,6 +55,7 @@ struct Vertice *cria_vertice(struct Grafo *grafo, int dado) {
 	if(pode_criar == 0) return NULL;
 
 	vertice = calloc(1, sizeof(struct Vertice));
+	if (vertice == NULL) return NULL;
 	vertice->dado = dado;
 	vertice->cor = BRANCO;
 
@@ -184,10 +188,10 @@ int deletar_vertice(struct Grafo *grafo, int dado) {
 
 }
 
-
+// se não houver um caminho essa função retorna um caminho contendo apenas a
+// origem.
 void menor_caminho(struct Fila *caminho, struct Vertice *origem, struct Vertice *destino) {
 	if(origem->cor == CINZA) return;
-	printf("DEBUG: origem: %d\n", origem->dado);
 	adicionar_elemento(caminho, &origem->dado);
 	origem->cor = CINZA;
 
@@ -236,14 +240,18 @@ void menor_caminho(struct Fila *caminho, struct Vertice *origem, struct Vertice 
 		}
 	}
 
-	struct _Elemento *proximo = NULL;
-	for (struct _Elemento *atual = menor_caminho->primeiro_elemento; atual != NULL; atual = proximo)
-	{
-		proximo = atual->proximo;
-		int dado_do_vertice_atual = *(int *)atual->elemento;
-		adicionar_elemento(caminho, &dado_do_vertice_atual);
+	// caso haja um menor caminho vamos adiciona-lo no caminho
+	if (menor_caminho != NULL) {
+		struct _Elemento* proximo = NULL;
+		for (struct _Elemento* atual = menor_caminho->primeiro_elemento; atual != NULL; atual = proximo)
+		{
+			proximo = atual->proximo;
+			int dado_do_vertice_atual = *(int*)atual->elemento;
+			adicionar_elemento(caminho, &dado_do_vertice_atual);
+		}
 	}
 
+	
 
 	for(int i = 0; i < origem->qtd_adjascentes; i++) {
 		deletar_fila(possiveis_caminhos + i);
@@ -254,81 +262,103 @@ void menor_caminho(struct Fila *caminho, struct Vertice *origem, struct Vertice 
 	return;
 }
 
+bool inicializar_grafo_com_20_vertices(struct Grafo *grafo) {
+	if (grafo == NULL) return false;
+	for (int i = 0; i < 20; i++) {
+		if (adiciona_ou_modifica_grafo(grafo, i, NULL, 0)) {
+			for (int j = 0; j < i; j++) {
+				deletar_vertice(grafo, j);
+			}
+			return false;
+		}
+	}
+	return true;
+}
+
+// Só deve ser chamado quando não há conexões feitas manualmente
+void fazer_conexoes_aleatorias(struct Grafo* grafo) {
+	int qtd_conexoes = 0;
+	while (qtd_conexoes < grafo->numero_vertices)
+	{
+		int a = rand() % (grafo->numero_vertices - 1);
+		int b = rand() % (grafo->numero_vertices - 1);
+		if (a == b) continue;
+		if (adiciona_ou_modifica_grafo(grafo, grafo->vertices[a]->dado, (struct Vertice* []) { procura_vertice(grafo, grafo->vertices[b]->dado) }, 1) == 0) {
+			qtd_conexoes++;
+		}
+	}
+}
 
 int main(void) {
-	struct Grafo *grafo = cria_grafo();
-
-	assert(grafo != NULL);
-	assert(grafo->numero_vertices == 0);
-	assert(grafo->vertices == NULL);
-
-	assert(adiciona_ou_modifica_grafo(grafo, 1, NULL, 0) == 0);
-	assert(grafo->numero_vertices == 1);
-	assert(grafo->vertices != NULL);
-	assert(grafo->vertices[0]->dado == 1);
-
-
-	//Testando se ele está impedindo de adicionar o mesmo número
-	assert(adiciona_ou_modifica_grafo(grafo, 1, NULL, 0) == 0);
-	assert(grafo->numero_vertices == 1);
-	assert(grafo->vertices != NULL);
-	assert(grafo->vertices[0]->dado == 1);
-	assert(grafo->vertices[0]->qtd_adjascentes == 0);
-
-
-	assert(adiciona_ou_modifica_grafo(grafo, 2, (struct Vertice *[]){procura_vertice(grafo, 1)}, 1) == 0);
-	assert(grafo->numero_vertices == 2);
-	assert(grafo->vertices[1]->dado == 2);
-	assert(grafo->vertices[1]->qtd_adjascentes == 1);
-	assert(grafo->vertices[0]->qtd_adjascentes == 1);
-	assert(grafo->vertices[0]->adjascentes[0]->dado == 2);
-
-	assert(adiciona_ou_modifica_grafo(grafo, 3, (struct Vertice *[]){procura_vertice(grafo, 1)}, 1) == 0);
-	assert(grafo->numero_vertices == 3);
-	assert(grafo->vertices[2]->dado == 3);
-	assert(grafo->vertices[2]->qtd_adjascentes == 1);
-	assert(grafo->vertices[0]->qtd_adjascentes == 2);
-	assert(grafo->vertices[0]->adjascentes[1]->dado == 3);
-
-	assert(adiciona_ou_modifica_grafo(
-			grafo, 
-			4, 
-			(struct Vertice *[]){procura_vertice(grafo, 2), procura_vertice(grafo, 3), procura_vertice(grafo, 1)}, 3) == 0);
-	/*
-	assert(grafo->numero_vertices == 4);
-	assert(grafo->vertices[3]->dado == 4);
-	assert(grafo->vertices[3]->qtd_adjascentes == 2);
-	assert(grafo->vertices[1]->qtd_adjascentes == 2);
-	assert(grafo->vertices[2]->qtd_adjascentes == 2);
-	assert(grafo->vertices[2]->adjascentes[1]->dado == 4);
-	assert(grafo->vertices[1]->adjascentes[1]->dado == 4);
-	assert(grafo->vertices[3]->adjascentes[0]->dado == 2);
-	assert(grafo->vertices[3]->adjascentes[1]->dado == 3);
-	*/
-	printa_grafo(grafo);
-
-	buscar_por_conexoes(grafo->vertices[0]);
-
-	//mostrar_conexoes(grafo);
-
-	struct Fila *fila = criar_fila(sizeof(int));
-	menor_caminho(fila, grafo->vertices[0], grafo->vertices[3]);
-	struct _Elemento *proximo = NULL;
-	for (struct _Elemento *atual = fila->primeiro_elemento; atual != NULL; atual = proximo)
-	{
-		proximo = atual->proximo;
-		int dado_do_vertice_atual = *(int *)atual->elemento;
-		printf("%d ", dado_do_vertice_atual);
+	setlocale(LC_ALL, "");
+	srand(time(NULL));
+	struct Grafo* grafo = cria_grafo();
+	if (grafo == NULL) {
+		fprintf(stderr, "Não foi possível criar a rede de computadores!\n");
+		exit(1);
 	}
+
+	puts("INIZIALIZANDO A REDE DE COMPUTADORES....");
+
+	if (!inicializar_grafo_com_20_vertices(grafo)) {
+		fprintf(stderr, "Não foi possível inicializar a rede de computadores!\n");
+	};
+
+	puts("Esse são os computadores que estão na rede(cada número é um computador):");
+	for (int i = 0; i < grafo->numero_vertices; i++) printf("%d ", grafo->vertices[i]->dado);
 	puts("");
 
-
-	
-	assert(!deletar_vertice(grafo, 4));
-	
-	puts("=====================================");
+	puts("GERANDO CONEXÕES ALEATÓRIAS");
+	fazer_conexoes_aleatorias(grafo);
+	puts("Esses são os computadores da rede com suas respectivas conexões: ");
 	printa_grafo(grafo);
+	
+	puts("CALCULANDO MENOR ROTA ENTRE COMPUTADORES!");
 
+	int partida = 0;
+	int destino = 0;
+	while (partida == destino) {
+		printf("Digite o número do computador de partida: ");
+		scanf("%d", &partida);
+		printf("Digite o número do computador de destino: ");
+		scanf("%d", &destino);
+		if (procura_vertice(grafo, partida) == NULL || procura_vertice(grafo, destino) == NULL) {
+			puts("Você digitou número de computadores inválidos. Tente novamente!");
+			partida = 0;
+			destino = 0;
+			continue;
+		}
+		if (destino == partida) {
+			puts("Por favor seleciona uma partida e um destino diferente!");
+		}
+	}
+
+	struct Fila* caminho_mais_curto = criar_fila(sizeof(int));
+	if (caminho_mais_curto == NULL) {
+		fprintf(stderr, "Não foi possível calcular o caminho mais curto por conta de um erro de memória!\n");
+		exit(1);
+	}
+	menor_caminho(caminho_mais_curto, procura_vertice(grafo,partida), procura_vertice(grafo, destino));
+
+	if (caminho_mais_curto->quantidade_elementos != 1) {
+		int contador = 1;
+		for (struct _Elemento* elemento = caminho_mais_curto->primeiro_elemento; elemento != NULL; elemento = elemento->proximo) {
+			if (contador == caminho_mais_curto->quantidade_elementos) {
+				printf("%d\n", *(int*)elemento->elemento);
+			}
+			else {
+				printf("%d -> ", *(int*)elemento->elemento);
+			}
+			contador++;
+		}
+	}
+	else {
+		printf("Não há um caminho que ligue o computador %d  ao computador %d\n", partida, destino);
+	}
+
+	puts("FIM...");
+
+	deletar_fila(&caminho_mais_curto);
 	destroi_grafo(&grafo);
-	exit(0);
+	return 0;
 }
