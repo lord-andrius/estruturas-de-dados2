@@ -17,11 +17,12 @@ struct Grafo *cria_grafo(void) {
 void destroi_grafo(struct Grafo **grafo) {
 	if(*grafo == NULL) return;
 
-	for(int i = 0; i < (*grafo)->numero_vertices; i++){
+	for(int i = (*grafo)->numero_vertices - 1; i >= 0; i--){
 		if((*grafo)->vertices[i] != NULL) {
 			if((*grafo)->vertices[i]->adjascentes != NULL) {
 				free((*grafo)->vertices[i]->adjascentes);
-			}	
+			}
+			free((*grafo)->vertices[i]);
 		}
 	}
 
@@ -126,9 +127,12 @@ int adiciona_ou_modifica_grafo(struct Grafo *grafo, int dado, struct Vertice **c
 
 	if(deve_add) {
 		if((vertice = cria_vertice(grafo,dado)) == NULL) return 1;
-		// melhor lidar com o realloc. No momento se houver uma falha na alocação vamos ter um vazamento de memória(Melhor o seu pc ter RAM!).
-		grafo->vertices = realloc(grafo->vertices,sizeof(struct Vertice **) * (grafo->numero_vertices + 1));
-		if(!grafo->vertices) return 1;
+		struct Vertice **novos_vertices = realloc(grafo->vertices,sizeof(struct Vertice **) * (grafo->numero_vertices + 1));
+		if(novos_vertices == NULL) {
+			free(vertice);
+			return 1;
+		}
+		grafo->vertices = novos_vertices;
 		grafo->vertices[grafo->numero_vertices++] = vertice;
 	}
 
@@ -266,9 +270,11 @@ bool inicializar_grafo_com_20_vertices(struct Grafo *grafo) {
 	if (grafo == NULL) return false;
 	for (int i = 0; i < 20; i++) {
 		if (adiciona_ou_modifica_grafo(grafo, i, NULL, 0)) {
-			for (int j = 0; j < i; j++) {
-				deletar_vertice(grafo, j);
+			for (int j = grafo->numero_vertices; j >= 0; j--) {
+				free(grafo->vertices[j]->adjascentes);
+				free(grafo->vertices[j]);
 			}
+			destroi_grafo(&grafo);
 			return false;
 		}
 	}
